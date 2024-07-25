@@ -10,9 +10,18 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score
 import numpy as np
 import pandas as pd
+import joblib
 
 # Initialize the sentiment analysis pipeline using a pre-trained BERT model
 sentiment_pipeline = pipeline("sentiment-analysis")
+
+# Load the pre-trained RandomForestClassifier
+try:
+    random_forest_classifier = joblib.load('trained_model.pkl')
+    count_vectorizer = joblib.load('count_vectorizer.pkl')
+except FileNotFoundError:
+    print("Error: Trained model not found. Please train the model first.")
+    sys.exit(1)
 
 # Initialize the CountVectorizer
 count_vectorizer = CountVectorizer(ngram_range=(1, 3))
@@ -78,80 +87,84 @@ def train_random_forest(X, y):
 
     return grid_search.best_estimator_
 
-def analyze_sentiment(subtitles):
+def analyze_sentiment(stocks):
     """
     Analyze the sentiment of text related to stock mentions using TextBlob, BERT, and RandomForestClassifier.
 
     Args:
-    subtitles (list of str): List of subtitle strings.
+    stocks (list of str): List of stock symbols.
 
     Returns:
-    dict: Dictionary with stock mentions as keys and their sentiment scores as values.
+    dict: Dictionary with stock symbols as keys and their sentiment analysis results as values.
     """
-    sentiment_scores = {}
+    sentiment_results = {}
 
-    preprocessed_subtitles = preprocess_text(subtitles)
-    features = extract_features(preprocessed_subtitles)
-
-    for subtitle in subtitles:
+    for stock in stocks:
         # Analyze sentiment using TextBlob
-        blob = TextBlob(subtitle)
-        textblob_sentiment = blob.sentiment.polarity
+        blob = TextBlob(stock)
+        textblob_sentiment = float(blob.sentiment.polarity)
 
         # Analyze sentiment using BERT
-        bert_sentiment = sentiment_pipeline(subtitle)[0]['label']
-        bert_score = 1 if bert_sentiment == 'POSITIVE' else -1
+        bert_result = sentiment_pipeline(stock)[0]
+        bert_score = float(1 if bert_result['label'] == 'POSITIVE' else -1)
 
         # Analyze sentiment using RandomForestClassifier
-        rf_sentiment = random_forest_classifier.predict(count_vectorizer.transform([subtitle]))[0]
+        rf_features = count_vectorizer.transform([stock])
+        rf_sentiment = int(random_forest_classifier.predict(rf_features)[0])
 
         # Combine the sentiment scores with adjusted weights
-        combined_sentiment = (0.2 * textblob_sentiment + 0.3 * bert_score + 0.5 * rf_sentiment)
-        sentiment_scores[subtitle] = combined_sentiment
+        combined_sentiment = float(0.2 * textblob_sentiment + 0.3 * bert_score + 0.5 * rf_sentiment)
 
-    return sentiment_scores
+        sentiment_results[stock] = {
+            'textblob_sentiment': float(textblob_sentiment),
+            'bert_sentiment': str(bert_result['label']),
+            'bert_score': float(bert_result['score']),
+            'rf_sentiment': int(rf_sentiment),
+            'combined_sentiment': float(combined_sentiment)
+        }
+
+    return sentiment_results
 
 # Example usage
 if __name__ == '__main__':
-    import argparse
     import joblib
 
-    parser = argparse.ArgumentParser(description="Sentiment Analysis for Stock-related Text")
-    parser.add_argument("--train", help="Path to training data file")
-    parser.add_argument("--predict", help="Text to predict sentiment for")
-    parser.add_argument("--model", default="trained_model.pkl", help="Path to save/load the trained model")
-    args = parser.parse_args()
+    try:
+        # Load the trained model and vectorizer
+        random_forest_classifier = joblib.load('trained_model.pkl')
+        count_vectorizer = joblib.load('count_vectorizer.pkl')
 
-    if args.train:
+        # Read identified stocks from JSON file
         try:
-            # Load and preprocess data for RandomForestClassifier
-            data = load_and_preprocess_data(args.train)
-
-            # Extract features and train RandomForestClassifier
-            X = count_vectorizer.fit_transform(data['text'])
-            y = data['sentiment']
-            random_forest_classifier = train_random_forest(X, y)
-
-            # Save the trained model
-            joblib.dump(random_forest_classifier, args.model)
-            joblib.dump(count_vectorizer, 'count_vectorizer.pkl')
-
-            print(f"Model trained successfully and saved to {args.model}")
-        except Exception as e:
-            print(f"An error occurred during training: {str(e)}")
-
-    elif args.predict:
-        try:
-            # Load the trained model and vectorizer
-            random_forest_classifier = joblib.load(args.model)
-            count_vectorizer = joblib.load('count_vectorizer.pkl')
-
-            sentiment_scores = analyze_sentiment([args.predict])
-            print(json.dumps(sentiment_scores))
+            with open('identified_stocks.json', 'r') as f:
+                data = json.load(f)
+                identified_stocks = data['stocks']
         except FileNotFoundError:
-            print("Error: Trained model not found. Please train the model first.")
-        except Exception as e:
-            print(f"An error occurred during prediction: {str(e)}")
+            print("Error: 'identified_stocks.json' not found.")
+            sys.exit(1)
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON in 'identified_stocks.json'.")
+            sys.exit(1)
 
-    else:
-        print("Please specify either --train or --predict")
+        # Analyze sentiment for identified stocks
+        sentiment_results = analyze_sentiment(identified_stocks)
+
+        # Convert numpy types to native Python types
+        for stock, result in sentiment_results.items():
+            for key, value in result.items():
+                if isinstance(value, np.number):
+                    result[key] = value.item()
+
+        # Save results to a new JSON file
+        try:
+            with open('sentiment_analysis_results.json', 'w') as f:
+                json.dump(sentiment_results, f, indent=2)
+            print("Sentiment analysis completed. Results saved in 'sentiment_analysis_results.json'.")
+        except IOError as e:
+            print(f"Error: Unable to write to 'sentiment_analysis_results.json'. {str(e)}")
+            sys.exit(1)
+
+    except FileNotFoundError:
+        print("Error: Required files not found. Please ensure 'trained_model.pkl' and 'count_vectorizer.pkl' exist.")
+    except Exception as e:
+        print(f"An error occurred during sentiment analysis: {str(e)}")

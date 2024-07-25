@@ -1,5 +1,4 @@
 import re
-import sys
 import json
 import os
 
@@ -8,7 +7,7 @@ def identify_stocks(subtitles):
     Identify stock mentions within the extracted subtitles.
 
     Args:
-    subtitles (list of str): List of subtitle strings.
+    subtitles (list of dict): List of subtitle dictionaries.
 
     Returns:
     list of str: List of identified stock symbols or company names.
@@ -47,7 +46,8 @@ def identify_stocks(subtitles):
 
     # Search through the subtitles to identify stock mentions
     for subtitle in subtitles:
-        matches = pattern.findall(subtitle)
+        text = subtitle['text']
+        matches = pattern.findall(text)
         for match in matches:
             identified_stocks.add(match.upper())
 
@@ -58,11 +58,16 @@ def identify_stocks(subtitles):
 
 # Example usage
 if __name__ == '__main__':
-    # Read subtitles from standard input or command line arguments
-    if len(sys.argv) > 1:
-        subtitles = json.loads(sys.argv[1])
-    else:
-        subtitles = json.load(sys.stdin)
+    # Read subtitles from the subtitles.json file
+    try:
+        with open('subtitles.json', 'r') as file:
+            subtitles = json.load(file)
+    except FileNotFoundError:
+        print("Error: Could not find the subtitles.json file")
+        exit(1)
+    except json.JSONDecodeError:
+        print("Error: Could not parse the subtitles.json file")
+        exit(1)
 
     identified_stocks = identify_stocks(subtitles)
     print(json.dumps(identified_stocks))
