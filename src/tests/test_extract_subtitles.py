@@ -23,29 +23,29 @@ class TestExtractSubtitles(unittest.TestCase):
 
     @patch('extract_subtitles.YouTubeTranscriptApi.get_transcript')
     def test_transcripts_disabled(self, mock_get_transcript):
-        mock_get_transcript.side_effect = CouldNotRetrieveTranscript('video_id', 'requested_language_codes', 'transcript_data')
+        mock_get_transcript.side_effect = CouldNotRetrieveTranscript('video_id', 'requested_language_codes')
         video_id = 'dQw4w9WgXcQ'
         with self.assertLogs(level='ERROR') as log:
             subtitles = extract_subtitles(video_id)
-            self.assertIn('Could not retrieve transcript for video_id', log.output[0])
+            self.assertIn('Subtitles are disabled for video_id', log.output[0])
         self.assertEqual(subtitles, [])
 
     @patch('extract_subtitles.YouTubeTranscriptApi.get_transcript')
     def test_no_transcript_found(self, mock_get_transcript):
-        mock_get_transcript.side_effect = CouldNotRetrieveTranscript('video_id', 'requested_language_codes', 'transcript_data')
+        mock_get_transcript.side_effect = CouldNotRetrieveTranscript('video_id', 'requested_language_codes')
         video_id = 'dQw4w9WgXcQ'
         with self.assertLogs(level='ERROR') as log:
             subtitles = extract_subtitles(video_id)
-            self.assertIn('Could not retrieve transcript for video_id', log.output[0])
+            self.assertIn('No transcript found for video_id', log.output[0])
         self.assertEqual(subtitles, [])
 
     @patch('extract_subtitles.YouTubeTranscriptApi.get_transcript')
     def test_video_unavailable(self, mock_get_transcript):
-        mock_get_transcript.side_effect = CouldNotRetrieveTranscript('video_id', 'requested_language_codes', 'transcript_data')
+        mock_get_transcript.side_effect = CouldNotRetrieveTranscript('video_id', 'requested_language_codes')
         video_id = 'dQw4w9WgXcQ'
         with self.assertLogs(level='ERROR') as log:
             subtitles = extract_subtitles(video_id)
-            self.assertIn('Could not retrieve transcript for video_id', log.output[0])
+            self.assertIn('Video is unavailable for video_id', log.output[0])
         self.assertEqual(subtitles, [])
 
     @patch('extract_subtitles.YouTubeTranscriptApi.get_transcript')
