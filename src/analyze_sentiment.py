@@ -13,7 +13,7 @@ import pandas as pd
 import joblib
 
 # Initialize the sentiment analysis pipeline using a pre-trained BERT model
-sentiment_pipeline = pipeline("sentiment-analysis")
+sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english", revision="af0f99b")
 
 # Load the pre-trained RandomForestClassifier
 try:
