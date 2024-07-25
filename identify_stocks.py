@@ -1,4 +1,6 @@
 import re
+import sys
+import json
 
 def identify_stocks(subtitles):
     """
@@ -33,14 +35,11 @@ def identify_stocks(subtitles):
 
 # Example usage
 if __name__ == '__main__':
-    # Example subtitles for testing
-    example_subtitles = [
-        "Apple's stock price has been rising steadily.",
-        "Google announced a new product today.",
-        "Amazon's revenue exceeded expectations.",
-        "Microsoft is investing in AI technology.",
-        "Tesla's new model is gaining popularity."
-    ]
+    # Read subtitles from standard input or command line arguments
+    if len(sys.argv) > 1:
+        subtitles = json.loads(sys.argv[1])
+    else:
+        subtitles = json.load(sys.stdin)
     
-    identified_stocks = identify_stocks(example_subtitles)
-    print("Identified stock mentions:", identified_stocks)
+    identified_stocks = identify_stocks(subtitles)
+    print(json.dumps(identified_stocks))

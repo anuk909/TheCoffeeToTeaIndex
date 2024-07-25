@@ -1,4 +1,6 @@
 from textblob import TextBlob
+import sys
+import json
 
 def analyze_sentiment(subtitles):
     """
@@ -20,15 +22,11 @@ def analyze_sentiment(subtitles):
 
 # Example usage
 if __name__ == '__main__':
-    # Example subtitles for testing
-    example_subtitles = [
-        "Apple's stock price has been rising steadily.",
-        "Google announced a new product today.",
-        "Amazon's revenue exceeded expectations.",
-        "Microsoft is investing in AI technology.",
-        "Tesla's new model is gaining popularity."
-    ]
+    # Read subtitles from standard input or command line arguments
+    if len(sys.argv) > 1:
+        subtitles = json.loads(sys.argv[1])
+    else:
+        subtitles = json.load(sys.stdin)
     
-    sentiment_scores = analyze_sentiment(example_subtitles)
-    for subtitle, score in sentiment_scores.items():
-        print(f"Subtitle: {subtitle}\nSentiment Score: {score}\n")
+    sentiment_scores = analyze_sentiment(subtitles)
+    print(json.dumps(sentiment_scores))
