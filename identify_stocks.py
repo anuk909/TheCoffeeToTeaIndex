@@ -12,12 +12,18 @@ def identify_stocks(subtitles):
     Returns:
     list of str: List of identified stock symbols or company names.
     """
-    # Define a list of common stock symbols and company names for testing purposes
-    stock_symbols = ['AAPL', 'GOOGL', 'AMZN', 'MSFT', 'TSLA']
-    company_names = ['Apple', 'Google', 'Amazon', 'Microsoft', 'Tesla']
+    # Load the extended list of stock symbols and company names from the JSON file
+    with open('/home/ubuntu/browser_downloads/top_1000_companies.json', 'r') as f:
+        companies = json.load(f)
+    
+    stock_symbols = [company['symbol'] for company in companies]
+    company_names = [company['name'] for company in companies]
     
     # Combine stock symbols and company names into a single list
     stock_mentions = stock_symbols + company_names
+    
+    # Print the count of loaded stock symbols and company names
+    print(f"Loaded {len(stock_symbols)} stock symbols and {len(company_names)} company names.")
     
     # Create a set to store identified stock mentions
     identified_stocks = set()
@@ -30,6 +36,9 @@ def identify_stocks(subtitles):
         matches = pattern.findall(subtitle)
         for match in matches:
             identified_stocks.add(match.upper())
+    
+    # Print identified stock mentions
+    print(f"Identified stock mentions: {identified_stocks}")
     
     return list(identified_stocks)
 
