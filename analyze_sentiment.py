@@ -27,10 +27,6 @@ def analyze_sentiment(subtitles):
         bert_sentiment = sentiment_pipeline(subtitle)[0]['label']
         bert_score = 1 if bert_sentiment == 'POSITIVE' else -1
         
-        # Adjust sentiment score for common positive phrases
-        if "to the moon" in subtitle.lower():
-            bert_score = 1
-        
         # Combine the sentiment scores
         combined_sentiment = (textblob_sentiment + bert_score) / 2
         sentiment_scores[subtitle] = combined_sentiment
