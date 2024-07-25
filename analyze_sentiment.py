@@ -1,10 +1,14 @@
 from textblob import TextBlob
+from transformers import pipeline
 import sys
 import json
 
+# Initialize the sentiment analysis pipeline using a pre-trained BERT model
+sentiment_pipeline = pipeline("sentiment-analysis")
+
 def analyze_sentiment(subtitles):
     """
-    Analyze the sentiment of text related to stock mentions.
+    Analyze the sentiment of text related to stock mentions using both TextBlob and BERT.
     
     Args:
     subtitles (list of str): List of subtitle strings.
@@ -15,8 +19,17 @@ def analyze_sentiment(subtitles):
     sentiment_scores = {}
     
     for subtitle in subtitles:
+        # Analyze sentiment using TextBlob
         blob = TextBlob(subtitle)
-        sentiment_scores[subtitle] = blob.sentiment.polarity
+        textblob_sentiment = blob.sentiment.polarity
+        
+        # Analyze sentiment using BERT
+        bert_sentiment = sentiment_pipeline(subtitle)[0]['label']
+        bert_score = 1 if bert_sentiment == 'POSITIVE' else -1
+        
+        # Combine the sentiment scores
+        combined_sentiment = (textblob_sentiment + bert_score) / 2
+        sentiment_scores[subtitle] = combined_sentiment
     
     return sentiment_scores
 
