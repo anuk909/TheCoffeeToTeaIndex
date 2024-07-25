@@ -4,6 +4,7 @@ import sys
 import json
 import argparse
 import pickle
+import os
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -17,10 +18,19 @@ sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncas
 
 # Load the pre-trained RandomForestClassifier
 try:
-    random_forest_classifier = joblib.load('trained_model.pkl')
-    count_vectorizer = joblib.load('count_vectorizer.pkl')
-except FileNotFoundError:
-    print("Error: Trained model not found. Please train the model first.")
+    model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'trained_model.pkl'))
+    vectorizer_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'count_vectorizer.pkl'))
+    print(f"Model path: {model_path}")
+    print(f"Vectorizer path: {vectorizer_path}")
+    random_forest_classifier = joblib.load(model_path)
+    count_vectorizer = joblib.load(vectorizer_path)
+    print("Model and vectorizer loaded successfully.")
+except FileNotFoundError as e:
+    print(f"Error: File not found. {str(e)}")
+    print("Please ensure 'trained_model.pkl' and 'count_vectorizer.pkl' exist in the 'models' directory.")
+    sys.exit(1)
+except Exception as e:
+    print(f"An unexpected error occurred while loading the model: {str(e)}")
     sys.exit(1)
 
 # Initialize the CountVectorizer
@@ -108,18 +118,17 @@ def analyze_sentiment(stocks):
         bert_result = sentiment_pipeline(stock)[0]
         bert_score = float(1 if bert_result['label'] == 'POSITIVE' else -1)
 
-        # Analyze sentiment using RandomForestClassifier
-        rf_features = count_vectorizer.transform([stock])
-        rf_sentiment = int(random_forest_classifier.predict(rf_features)[0])
+        # # Analyze sentiment using RandomForestClassifier
+        # rf_features = count_vectorizer.transform([stock])
+        # rf_sentiment = int(random_forest_classifier.predict(rf_features)[0])
 
         # Combine the sentiment scores with adjusted weights
-        combined_sentiment = float(0.2 * textblob_sentiment + 0.3 * bert_score + 0.5 * rf_sentiment)
+        combined_sentiment = float(0.5 * textblob_sentiment + 0.5 * bert_score)
 
         sentiment_results[stock] = {
             'textblob_sentiment': float(textblob_sentiment),
             'bert_sentiment': str(bert_result['label']),
             'bert_score': float(bert_result['score']),
-            'rf_sentiment': int(rf_sentiment),
             'combined_sentiment': float(combined_sentiment)
         }
 

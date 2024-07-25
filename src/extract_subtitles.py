@@ -14,7 +14,7 @@ def extract_subtitles(video_id):
             return []
 
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        subtitles = [entry['text'] for entry in transcript]
+        subtitles = [{'text': entry['text']} for entry in transcript]
         return subtitles
     except TranscriptsDisabled:
         logging.error(f"Subtitles are disabled for video_id: {video_id}")
