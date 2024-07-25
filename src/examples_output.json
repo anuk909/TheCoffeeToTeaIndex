@@ -1,0 +1,133 @@
+{
+  "positive_sentiment": [
+    {
+      "ON": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.987031877040863,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "META": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9894744157791138,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "APPLE": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9942066669464111,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "NOW": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9830917716026306,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "IT": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9926723837852478,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "A": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9872909188270569,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "COST": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9845149517059326,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "D": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9728984832763672,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "SO": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9129678606987,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "ARE": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9784749746322632,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "ALL": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9902591705322266,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "WELL": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9995703101158142,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    },
+    {
+      "APP": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "POSITIVE",
+        "bert_score": 0.9684572219848633,
+        "rf_sentiment": 0,
+        "combined_sentiment": 0.3
+      }
+    }
+  ],
+  "negative_sentiment": [
+    {
+      "T": {
+        "textblob_sentiment": 0.0,
+        "bert_sentiment": "NEGATIVE",
+        "bert_score": 0.9681645035743713,
+        "rf_sentiment": 0,
+        "combined_sentiment": -0.3
+      }
+    }
+  ],
+  "neutral_sentiment": []
+}
