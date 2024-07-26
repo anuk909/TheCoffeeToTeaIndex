@@ -2,24 +2,29 @@ from textblob import TextBlob
 from transformers import pipeline
 import sys
 import json
-import argparse
-import pickle
 import os
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV
 import numpy as np
 import pandas as pd
 import joblib
 
 # Initialize the sentiment analysis pipeline using a pre-trained BERT model
-sentiment_pipeline = pipeline("sentiment-analysis", model="distilbert-base-uncased-finetuned-sst-2-english", revision="af0f99b")
+sentiment_pipeline = pipeline(
+    "sentiment-analysis",
+    model="distilbert-base-uncased-finetuned-sst-2-english",
+    revision="af0f99b",
+)
 
 # Load the pre-trained RandomForestClassifier
 try:
-    model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'trained_model.pkl'))
-    vectorizer_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'models', 'count_vectorizer.pkl'))
+    model_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "models", "trained_model.pkl")
+    )
+    vectorizer_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "models", "count_vectorizer.pkl")
+    )
     print(f"Model path: {model_path}")
     print(f"Vectorizer path: {vectorizer_path}")
     random_forest_classifier = joblib.load(model_path)
@@ -27,7 +32,9 @@ try:
     print("Model and vectorizer loaded successfully.")
 except FileNotFoundError as e:
     print(f"Error: File not found. {str(e)}")
-    print("Please ensure 'trained_model.pkl' and 'count_vectorizer.pkl' exist in the 'models' directory.")
+    print(
+        "Please ensure 'trained_model.pkl' and 'count_vectorizer.pkl' exist in the 'models' directory."
+    )
     sys.exit(1)
 except Exception as e:
     print(f"An unexpected error occurred while loading the model: {str(e)}")
@@ -35,6 +42,7 @@ except Exception as e:
 
 # Initialize the CountVectorizer
 count_vectorizer = CountVectorizer(ngram_range=(1, 3))
+
 
 def preprocess_text(subtitles):
     """
@@ -49,9 +57,12 @@ def preprocess_text(subtitles):
     preprocessed_subtitles = []
     for subtitle in subtitles:
         subtitle = subtitle.lower()
-        subtitle = ''.join([char for char in subtitle if char.isalnum() or char.isspace()])
+        subtitle = "".join(
+            [char for char in subtitle if char.isalnum() or char.isspace()]
+        )
         preprocessed_subtitles.append(subtitle)
     return preprocessed_subtitles
+
 
 def extract_features(subtitles):
     """
@@ -65,37 +76,46 @@ def extract_features(subtitles):
     """
     return count_vectorizer.fit_transform(subtitles)
 
+
 def load_and_preprocess_data(file_path):
     """
     Load and preprocess the Financial PhraseBank dataset.
     """
     # Load the dataset with ISO-8859-1 encoding
-    data = pd.read_csv(file_path, sep="@", names=["text", "sentiment"], encoding='ISO-8859-1')
+    data = pd.read_csv(
+        file_path, sep="@", names=["text", "sentiment"], encoding="ISO-8859-1"
+    )
 
     # Preprocess the data
-    data['sentiment'] = data['sentiment'].map({'positive': 1, 'negative': -1, 'neutral': 0})
+    data["sentiment"] = data["sentiment"].map(
+        {"positive": 1, "negative": -1, "neutral": 0}
+    )
 
     return data
+
 
 def train_random_forest(X, y):
     """
     Train the RandomForestClassifier with hyperparameter tuning.
     """
     param_grid = {
-        'n_estimators': [100, 200, 300],
-        'max_depth': [None, 10, 20, 30],
-        'min_samples_split': [2, 5, 10],
-        'min_samples_leaf': [1, 2, 4]
+        "n_estimators": [100, 200, 300],
+        "max_depth": [None, 10, 20, 30],
+        "min_samples_split": [2, 5, 10],
+        "min_samples_leaf": [1, 2, 4],
     }
 
     rf = RandomForestClassifier(random_state=42)
-    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2)
+    grid_search = GridSearchCV(
+        estimator=rf, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2
+    )
     grid_search.fit(X, y)
 
     print(f"Best parameters: {grid_search.best_params_}")
     print(f"Best cross-validation score: {grid_search.best_score_}")
 
     return grid_search.best_estimator_
+
 
 def analyze_sentiment(stocks):
     """
@@ -116,7 +136,7 @@ def analyze_sentiment(stocks):
 
         # Analyze sentiment using BERT
         bert_result = sentiment_pipeline(stock)[0]
-        bert_score = float(1 if bert_result['label'] == 'POSITIVE' else -1)
+        bert_score = float(1 if bert_result["label"] == "POSITIVE" else -1)
 
         # # Analyze sentiment using RandomForestClassifier
         # rf_features = count_vectorizer.transform([stock])
@@ -126,28 +146,29 @@ def analyze_sentiment(stocks):
         combined_sentiment = float(0.5 * textblob_sentiment + 0.5 * bert_score)
 
         sentiment_results[stock] = {
-            'textblob_sentiment': float(textblob_sentiment),
-            'bert_sentiment': str(bert_result['label']),
-            'bert_score': float(bert_result['score']),
-            'combined_sentiment': float(combined_sentiment)
+            "textblob_sentiment": float(textblob_sentiment),
+            "bert_sentiment": str(bert_result["label"]),
+            "bert_score": float(bert_result["score"]),
+            "combined_sentiment": float(combined_sentiment),
         }
 
     return sentiment_results
 
+
 # Example usage
-if __name__ == '__main__':
+if __name__ == "__main__":
     import joblib
 
     try:
         # Load the trained model and vectorizer
-        random_forest_classifier = joblib.load('trained_model.pkl')
-        count_vectorizer = joblib.load('count_vectorizer.pkl')
+        random_forest_classifier = joblib.load("trained_model.pkl")
+        count_vectorizer = joblib.load("count_vectorizer.pkl")
 
         # Read identified stocks from JSON file
         try:
-            with open('identified_stocks.json', 'r') as f:
+            with open("identified_stocks.json", "r") as f:
                 data = json.load(f)
-                identified_stocks = data['stocks']
+                identified_stocks = data["stocks"]
         except FileNotFoundError:
             print("Error: 'identified_stocks.json' not found.")
             sys.exit(1)
@@ -166,14 +187,20 @@ if __name__ == '__main__':
 
         # Save results to a new JSON file
         try:
-            with open('sentiment_analysis_results.json', 'w') as f:
+            with open("sentiment_analysis_results.json", "w") as f:
                 json.dump(sentiment_results, f, indent=2)
-            print("Sentiment analysis completed. Results saved in 'sentiment_analysis_results.json'.")
+            print(
+                "Sentiment analysis completed. Results saved in 'sentiment_analysis_results.json'."
+            )
         except IOError as e:
-            print(f"Error: Unable to write to 'sentiment_analysis_results.json'. {str(e)}")
+            print(
+                f"Error: Unable to write to 'sentiment_analysis_results.json'. {str(e)}"
+            )
             sys.exit(1)
 
     except FileNotFoundError:
-        print("Error: Required files not found. Please ensure 'trained_model.pkl' and 'count_vectorizer.pkl' exist.")
+        print(
+            "Error: Required files not found. Please ensure 'trained_model.pkl' and 'count_vectorizer.pkl' exist."
+        )
     except Exception as e:
         print(f"An error occurred during sentiment analysis: {str(e)}")
